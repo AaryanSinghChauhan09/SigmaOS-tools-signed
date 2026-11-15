@@ -1,0 +1,14 @@
+[package]
+name = "sigmaos-tools-signed"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "sigmaos_tools_signed"
+path = "src/lib.rs"
+
+[[bin]]
+name = "signed"
+path = "src/main.rs"
+
+[dependencies]

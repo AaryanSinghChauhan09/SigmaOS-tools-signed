@@ -1,0 +1,1 @@
+# SigmaOS-tools-signed\n\nSigmaOS signed - Cryptographic PDF signing utility\n
