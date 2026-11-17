@@ -3,7 +3,7 @@ name = "SigmaOS-tools-signed"
 tier = 2
 stability = "scaffold"
 language = "rust"
-description = "tools-signed component"
+description = "SigmaOS Tools signed - Cryptographic PDF signing utility (omacom/signed parity)"
 upstream = []
 
 [contract]
