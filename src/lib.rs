@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 //! signed - Cryptographic PDF signing utility for SigmaOS
 
 use std::path::PathBuf;
@@ -48,6 +49,9 @@ impl PdfSignatureJob {
     }
 
     pub fn sign(&mut self, timestamp: &str) -> Result<(), String> {
+        if self.is_signed() {
+            return Err("Document is already signed".to_string());
+        }
         if self.fields.is_empty() {
             return Err("No signature fields defined".to_string());
         }
@@ -63,5 +67,45 @@ impl PdfSignatureJob {
 
     pub fn field_count(&self) -> usize {
         self.fields.len()
+    }
+}
+
+
+#[cfg(test)]
+mod signed_extra_tests {
+    use super::*;
+
+    #[test]
+    fn test_signed_multiple_fields_count_aaa() {
+        // Arrange
+        let signer = Signer { name: "Carol".into(), email: "carol@sigmaos.org".into(), organization: Some("SigmaOS".into()) };
+        let mut job = PdfSignatureJob::new("/tmp/agreement.pdf", signer);
+        job.add_field(SignatureField { page: 1, x: 0.0, y: 0.0, width: 100.0, height: 30.0, field_name: "s1".into() });
+        job.add_field(SignatureField { page: 2, x: 50.0, y: 50.0, width: 100.0, height: 30.0, field_name: "s2".into() });
+        // Act & Assert
+        assert_eq!(job.field_count(), 2);
+        assert!(!job.is_signed());
+    }
+
+    #[test]
+    fn test_signed_already_signed_error_aaa() {
+        // Arrange
+        let signer = Signer { name: "Dave".into(), email: "d@sigmaos.org".into(), organization: None };
+        let mut job = PdfSignatureJob::new("/tmp/contract.pdf", signer);
+        job.add_field(SignatureField { page: 1, x: 0.0, y: 0.0, width: 50.0, height: 20.0, field_name: "sig".into() });
+        job.sign("2026-11-19T00:00:00Z").unwrap();
+        // Act
+        let res = job.sign("2026-11-19T01:00:00Z");
+        // Assert
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_signed_signer_info_aaa() {
+        // Arrange & Act
+        let signer = Signer { name: "Eve".into(), email: "eve@sigmaos.org".into(), organization: Some("Foundation".into()) };
+        // Assert
+        assert_eq!(signer.name, "Eve");
+        assert_eq!(signer.organization.as_deref(), Some("Foundation"));
     }
 }
